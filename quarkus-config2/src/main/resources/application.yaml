@@ -1,0 +1,88 @@
+quarkus:
+  log:
+    level: ERROR
+    console:
+      format: "%d{HH:mm:ss:SSS} %-5p (%t) [%c{1.}] %s%e%n"
+      color: true
+      level: INFO
+    file:
+      enable: true
+      format: "%d{HH:mm:ss:SSS} %-5p (%t) [%c{1.}] %s%e%n"
+      path: ${mdp.paths.base-dir}/logs/sqlcobol.log
+      level: INFO
+      rotation:
+        max-file-size: 1M
+        max-backup-index: 100
+        file-suffix: "yyyy-MM-dd"
+    category:
+      "org.examples.quarkus":
+        level: INFO
+  datasource:
+    db-kind: oracle
+    credentials-provider: custom
+    credentials-provider-name: my-bbdd-credentials-provider
+    jdbc:
+      driver: oracle.jdbc.driver.OracleDriver
+      url: jdbc:oracle:thin:@localhost:1521/XEPDB1
+      max-size: 13
+  flyway:
+    locations: classpath:/db/migration
+    schemas: SQLCOBOL
+    migrate-at-start: true
+mdp:
+  security:
+    shared-key:
+      filename: ${mdp.paths.security-dir}/shared.key
+      type-file: file  ## Values file or resource
+    credentials:
+    - type: oracle  ## oracle
+      username: SQLCOBOL
+      password: admin123
+  log:
+    category: 
+      "org.antlr":
+         out: INFO
+         err: ERROR
+
+
+"%test":
+  quarkus:
+    log:
+      level: INFO
+      category:
+        "org.examples.quarkus":
+          level: DEBUG
+        "org.h2":
+          level: INFO
+        "org.flywaydb.core":
+          level: INFO
+    datasource:
+      db-kind: h2
+      jdbc:
+        driver: org.h2.Driver
+        url: jdbc:h2:tcp://localhost/mem:sqlcobol
+        # url: jdbc:h2:${mdp.paths.data-dir}/h2/sqlcobol1;AUTO_SERVER=TRUE
+        max-size: 13
+    flyway:
+      locations: classpath:db/migration-test
+      schemas: PUBLIC
+      migrate-at-start: true
+      clean-at-start: true
+
+  mdp:
+    security:
+      shared-key:
+        filename: shared.key
+        type-file: resource  ## Values file or resource
+      credentials:
+      - type: h2
+        username: tools
+        password: admin123
+    log:
+      category: 
+        org.antlr:
+           out: INFO
+           err: ERROR
+        io.prolead:
+           out: WARN
+           err: DEBUG
